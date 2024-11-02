@@ -1,12 +1,188 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBox3</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horários das Aulas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #output {
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
-  <h1>Dbox3 - em breve...</h1>
+  <h1>Horários das Aulas</h1>
+  <label for="modeSelect">Selecione a visualização:</label>
+  <select id="modeSelect">
+    <option value="porDia">Por Dia</option>
+    <option value="porTurma">Por Turma</option>
+    <option value="porProfessor">Por Professor</option>
+  </select>
+
+  <div id="output"></div>
+
+  <script>
+    const schedule = {
+      turmas: {
+        turma1: {
+          segunda: ["disciplina1", "disciplina2", "disciplina3", "disciplina4", "disciplina5"],
+          terça: ["disciplina6", "disciplina1", "disciplina2", "disciplina3", "disciplina4"],
+          quarta: ["disciplina5", "disciplina6", "disciplina1", "disciplina2", "disciplina3"],
+          quinta: ["disciplina4", "disciplina5", "disciplina6", "disciplina1", "disciplina2"],
+          sexta: ["disciplina3", "disciplina4", "disciplina5", "disciplina6", "disciplina1"]
+        },
+        turma2: {
+          segunda: ["disciplina2", "disciplina3", "disciplina4", "disciplina5", "disciplina6"],
+          terça: ["disciplina1", "disciplina2", "disciplina3", "disciplina4", "disciplina5"],
+          quarta: ["disciplina6", "disciplina1", "disciplina2", "disciplina3", "disciplina4"],
+          quinta: ["disciplina5", "disciplina6", "disciplina1", "disciplina2", "disciplina3"],
+          sexta: ["disciplina4", "disciplina5", "disciplina6", "disciplina1", "disciplina2"]
+        }
+        // demais turmas...
+      },
+      professores: {
+        prof1: {
+          segunda: ["turma1", "turma2", null, null, "turma1"],
+          terça: ["turma1", "turma2", "turma1", null, null],
+          quarta: ["turma2", "turma1", "turma2", "turma1", null],
+          quinta: ["turma1", null, "turma2", "turma1", "turma2"],
+          sexta: [null, "turma2", "turma1", "turma2", "turma1"]
+        },
+        prof2: {
+          segunda: [null, "turma1", "turma2", "turma1", "turma2"],
+          terça: ["turma2", null, "turma1", "turma2", "turma1"],
+          quarta: ["turma1", "turma2", null, "turma1", "turma2"],
+          quinta: ["turma2", "turma1", "turma2", null, "turma1"],
+          sexta: ["turma1", "turma2", "turma1", "turma2", null]
+        }
+        // demais professores...
+      }
+    };
+
+    document.getElementById("modeSelect").addEventListener("change", function(event) {
+      const mode = event.target.value;
+      const outputDiv = document.getElementById("output");
+      outputDiv.innerHTML = ""; // Limpar conteúdo atual
+
+      if (mode === "porDia") {
+        renderPorDia();
+      } else if (mode === "porTurma") {
+        renderPorTurma();
+      } else if (mode === "porProfessor") {
+        renderPorProfessor();
+      }
+    });
+
+    function renderPorDia() {
+      const dias = ["segunda", "terça", "quarta", "quinta", "sexta"];
+      const outputDiv = document.getElementById("output");
+
+      dias.forEach(dia => {
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+        const header = document.createElement("th");
+        header.colSpan = 6;
+        header.innerText = `Horários de ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
+        headerRow.appendChild(header);
+        table.appendChild(headerRow);
+
+        const turmaRow = document.createElement("tr");
+        turmaRow.innerHTML = `<th>Período</th><th>Turma 1</th><th>Turma 2</th>`;
+        table.appendChild(turmaRow);
+
+        for (let i = 0; i < 5; i++) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${i + 1}</td>
+                           <td>${schedule.turmas.turma1[dia][i] || ""}</td>
+                           <td>${schedule.turmas.turma2[dia][i] || ""}</td>`;
+          table.appendChild(row);
+        }
+
+        outputDiv.appendChild(table);
+      });
+    }
+
+    function renderPorTurma() {
+      const dias = ["segunda", "terça", "quarta", "quinta", "sexta"];
+      const turmas = ["turma1", "turma2"];
+      const outputDiv = document.getElementById("output");
+
+      turmas.forEach(turma => {
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+        const header = document.createElement("th");
+        header.colSpan = 6;
+        header.innerText = `Horários de ${turma.charAt(0).toUpperCase() + turma.slice(1)}`;
+        headerRow.appendChild(header);
+        table.appendChild(headerRow);
+
+        // Linha de dias
+        const diasRow = document.createElement("tr");
+        diasRow.innerHTML = `<th>Período</th>`;
+        dias.forEach(dia => {
+          diasRow.innerHTML += `<th>${dia.charAt(0).toUpperCase() + dia.slice(1)}</th>`;
+        });
+        table.appendChild(diasRow);
+
+        // Linhas de períodos
+        for (let i = 0; i < 5; i++) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${i + 1}</td>`; // Coluna do período
+          dias.forEach(dia => {
+            row.innerHTML += `<td>${schedule.turmas[turma][dia][i] || ""}</td>`;
+          });
+          table.appendChild(row);
+        }
+
+        outputDiv.appendChild(table);
+      });
+    }
+
+    function renderPorProfessor() {
+      const dias = ["segunda", "terça", "quarta", "quinta", "sexta"];
+      const professores = ["prof1", "prof2"];
+      const outputDiv = document.getElementById("output");
+
+      professores.forEach(professor => {
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+        const header = document.createElement("th");
+        header.colSpan = 6;
+        header.innerText = `Horários de ${professor.charAt(0).toUpperCase() + professor.slice(1)}`;
+        headerRow.appendChild(header);
+        table.appendChild(headerRow);
+
+        dias.forEach(dia => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<th>${dia.charAt(0).toUpperCase() + dia.slice(1)}</th>`;
+          for (let i = 0; i < 5; i++) {
+            row.innerHTML += `<td>${schedule.professores[professor][dia][i] || ""}</td>`;
+          }
+          table.appendChild(row);
+        });
+
+        outputDiv.appendChild(table);
+      });
+    }
+    
+    // Inicializa com a exibição "Por Dia"
+    renderPorDia();
+  </script>
 </body>
 </html>
